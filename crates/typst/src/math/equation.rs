@@ -298,9 +298,26 @@ fn layout_equation_inline(
 
         let font_size = scaled_font_size(&ctx, styles);
         let slack = ParElem::leading_in(styles) * 0.7;
-        let top_edge = TextElem::top_edge_in(styles).resolve(font_size, &font, None);
-        let bottom_edge =
-            -TextElem::bottom_edge_in(styles).resolve(font_size, &font, None);
+        let top_edge = TextElem::top_edge_in(styles).resolve(
+            font_size,
+            &font,
+            Some(ttf_parser::Rect {
+                y_max: (frame.ascent() / font_size * font.units_per_em()) as _,
+                x_min: 0,
+                y_min: 0,
+                x_max: 0,
+            }),
+        );
+        let bottom_edge = -TextElem::bottom_edge_in(styles).resolve(
+            font_size,
+            &font,
+            Some(ttf_parser::Rect {
+                y_min: (-frame.descent() / font_size * font.units_per_em()) as _,
+                x_min: 0,
+                y_max: 0,
+                x_max: 0,
+            }),
+        );
 
         let ascent = top_edge.max(frame.ascent() - slack);
         let descent = bottom_edge.max(frame.descent() - slack);
