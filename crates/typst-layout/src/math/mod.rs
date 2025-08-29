@@ -215,14 +215,22 @@ pub fn layout_equation_block(
         SpecificAlignment::V(v) => SpecificAlignment::Both(OuterHAlignment::End, v),
         SpecificAlignment::Both(h, v) => SpecificAlignment::Both(h, v),
     };
+    let valign = number_align.y().unwrap();
 
     // Add equation numbers to each equation region.
     let region_count = equation_builders.len();
     let frames = equation_builders
         .into_iter()
-        .map(|builder| {
+        .enumerate()
+        .map(|(i, builder)| {
             if builder.frames.is_empty() && region_count > 1 {
                 // Don't number empty regions, but do number empty equations.
+                return builder.build();
+            }
+            if valign == VAlignment::Bottom && i + 1 < region_count
+                || valign == VAlignment::Top && i > 0
+            {
+                // For top/bottom valign, only number the first/last broken part of an equation
                 return builder.build();
             }
             add_equation_number(
